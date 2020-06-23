@@ -1,14 +1,57 @@
 var rainbowEnable = false;
+var status= "";
+
+var heartbeat_msg = '--heartbeat--', heartbeat_interval = null, missed_heartbeats = 0;
 var connection = new WebSocket('ws://' + location.hostname + ':81/', ['arduino']);
 connection.onopen = function () {
-  connection.send('Connect ' + new Date());
+connection.send('Connect ' + new Date());
+
+  if (heartbeat_interval === null) {
+        missed_heartbeats = 0;
+        heartbeat_interval = setInterval(function() {
+            try {
+                missed_heartbeats++;
+                if (missed_heartbeats >= 5)
+                    throw new Error("Too many missed heartbeats.");
+                WebSocket.send(heartbeat_msg);
+            } catch(e) {
+                clearInterval(heartbeat_interval);
+                heartbeat_interval = null;
+                console.warn("Closing connection. Reason: " + e.message);
+                //WebSocket.close();
+            }
+        }, 5000);
+    }
+  
+  
+  
 };
 connection.onerror = function (error) {
   console.log('WebSocket Error ', error);
 };
+
+
 connection.onmessage = function (e) {
-  console.log('Server: ', e.data);
+    console.log('Server: ', e.data);
+    if (e.data === heartbeat_msg) {
+        // reset the counter for missed heartbeats
+        missed_heartbeats = 0;
+      // led blink function
+      status = document.getElementById('blink').src;
+      var parts = status.split('/');
+      var answer = parts[parts.length - 1];
+      //console.log("led status is :"+answer)
+      if (answer === "pic_bulbon.gif") {
+        document.getElementById('blink').src = "pic_bulboff.gif";
+      //  console.log("led switched to OFF:"+document.getElementById('blink').src )
+      } else {
+        document.getElementById('blink').src = "pic_bulbon.gif";
+      //  console.log("led switched to ON:"+document.getElementById('blink').src )
+      }
+    }
+ 
 };
+
 connection.onclose = function () {
   console.log('WebSocket connection closed');
 };

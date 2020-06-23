@@ -3,7 +3,7 @@
 <head>
   <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
   <meta content="utf-8" http-equiv="encoding">
-  <title>Remote Rotor Controller</title>
+  <title>NodeMCU Rotor Controller</title>
   <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport'>
   <link href='https://fonts.googleapis.com/css?family=Roboto:300' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous"> 
@@ -36,7 +36,8 @@
      <!-- Navigation -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Web Rotor Controller</a>
+      <a class="navbar-brand" href="#">Web Rotor Controller  <img id=blink src="pic_bulbon.gif" width="20" ></a>
+     
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -143,7 +144,9 @@ function notPressingDown_cw(e) {
 
       document.getElementById("button_cw").innerHTML = "CW OFF";
       sendSwitch();
+      document.getElementById("rot_stat").className = "alert alert-secondary custom1"; 
       document.getElementById("rot_stat").innerHTML = "Rotor stopped.";
+      document.getElementById("rot_stat").className = "alert alert-primary custom1"; 
       console.log("Not pressing CW!");
 
     }
@@ -155,7 +158,10 @@ function notPressingDown_cw(e) {
       
       document.getElementById("button_ccw").innerHTML = "CCW OFF";
       sendSwitch();
+      document.getElementById("rot_stat").className = "alert alert-primary custom1"; 
       document.getElementById("rot_stat").innerHTML = "Rotor stopped.";
+      document.getElementById("rot_stat").className = "alert alert-primary custom1"; 
+  
       console.log("Not pressing CCW!");
 
     }
@@ -200,12 +206,14 @@ function timer_ccw() {
 function doSomething_ccw(e) {
       console.log("pressHold event fired CCW!");
       document.getElementById("button_ccw").innerHTML = "CCW ON";
+      document.getElementById("rot_stat").className = "alert alert-danger custom1"; 
       document.getElementById("rot_stat").innerHTML = "Rotor turning CCW.";
       sendSwitch();
     }
 function doSomething_cw(e) {
       console.log("pressHold event fired CW!");
       document.getElementById("button_cw").innerHTML = "CW ON";
+    document.getElementById("rot_stat").className = "alert alert-danger custom1"; 
       document.getElementById("rot_stat").innerHTML = "Rotor turning CW.";
       sendSwitch();
 
