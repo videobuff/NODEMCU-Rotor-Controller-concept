@@ -26,7 +26,7 @@
                 Should be compatible with Arduino 1.0 + and
                 newer ESP8266/Arduino releases if any
                 Internal flash File system should contain web
-                page called /index.htm. Use ESP8266FS Tool
+                page called /index.html. Use ESP8266FS Tool
                 to upload File system contents via Arduino IDE.
   
   References:   - Orig9nal idea by David A. Mellis and 
@@ -51,18 +51,18 @@ WebSocketsServer webSocket(81);    // create a websocket server on port 81
 
 File fsUploadFile;                 // a File variable to temporarily store the received file
 
-const char *ssid = "xxxxxxxxxxxxxxx"; // The name of the Wi-Fi network that will be created
-const char *password = "xxxxxxxxxxxxx";   // The password required to connect to it, leave blank for an open network
+const char *ssid = "XXXXXXXXXX"; // The name of the Wi-Fi network that will be created
+const char *password = "XXXXXXXXXX";   // The password required to connect to it, leave blank for an open network
 
 const char *OTAName = "webrotor";           // A name and a password for the OTA service
 const char *OTAPassword = "pa0esh";
 
-const int led_pin     = 13;  // Testing LED pin
-const int cw_pin      = 2;  // connect your cw relais between GND and this pin
-const int ccw_pin     = 16;  // connect your ccw relais between GND and this pin
-const int brake_pin   = 14;  // connect your brake relais between GND and this pin
-const int spare_pin   = 12;  // connect your spare relais between GND and this pin
-const int analog_pin  = 34;  // connect your spare relais between GND and this pin
+const int led_pin     = D2;  // Testing LED pin
+const int cw_pin      = D3;  // connect your cw relais between GND and this pin
+const int ccw_pin     = D4;  // connect your ccw relais between GND and this pin
+const int brake_pin   = D5;  // connect your brake relais between GND and this pin
+const int spare_pin   = D6;  // connect your spare relais between GND and this pin
+const int analog_pin  = A0;  // connect your potentiometer middle to this pin. other side 3.3V and GND
 
 
 int led_state     = 0;
@@ -150,9 +150,9 @@ void startOTA() { // Start the OTA service
 
   ArduinoOTA.onStart([]() {
     Serial.println("Start");
-    //digitalWrite(LED_RED, 0);    // turn off the LEDs
-    //digitalWrite(LED_GREEN, 0);
-    //digitalWrite(LED_BLUE, 0);
+    digitalWrite(cw_pin, 1);    // turn off the LEDs
+    digitalWrite(ccw_pin, 1);
+    digitalWrite(brake_pin, 0);
   });
   ArduinoOTA.onEnd([]() {
     Serial.println("\r\nEnd");
