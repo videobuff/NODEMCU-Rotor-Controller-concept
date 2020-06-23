@@ -32,7 +32,7 @@
   References:   - Orig9nal idea by David A. Mellis and 
                   modified by Tom Igoe
                 
-  Date:         12 April 2020
+  Date:         24 juni 2020
  
   Author:       Erik Schott - erik@pa0esh.com
 --------------------------------------------------------------*/
@@ -43,6 +43,7 @@
 #include <ESP8266mDNS.h>
 #include <FS.h>
 #include <WebSocketsServer.h>
+#include <Ticker.h>
 
 ESP8266WiFiMulti wifiMulti;       // Create an instance of the ESP8266WiFiMulti class, called 'wifiMulti'
 
@@ -50,6 +51,9 @@ ESP8266WebServer server(80);       // Create a webserver object that listens for
 WebSocketsServer webSocket(81);    // create a websocket server on port 81
 
 File fsUploadFile;                 // a File variable to temporarily store the received file
+
+Ticker blinker;
+
 
 const char *ssid = "XXXXXXXXXX"; // The name of the Wi-Fi network that will be created
 const char *password = "XXXXXXXXXX";   // The password required to connect to it, leave blank for an open network
@@ -75,7 +79,17 @@ int analog_val_old = 0;
 
 const char* mdnsName = "webrotor"; // Domain name for the mDNS responder
 
+void HeartBeat(){
+    // sent by greadcast string data -- hearbeat --
+    String msg = "--heartbeat--";
+    webSocket.broadcastTXT(msg);
+
+}
+
+
+
 void setup() {
+
   // Init LED and turn off
   pinMode(led_pin, OUTPUT);
   digitalWrite(led_pin, LOW);
@@ -90,26 +104,21 @@ void setup() {
 
   Serial.begin(115200);        // Start the Serial communication to send messages to the computer
   delay(10);
+ blinker.attach(1.5, HeartBeat); //Use <strong>attach_ms</strong> if
   Serial.println("\r\n");
 
   startWiFi();                 // Start a Wi-Fi access point, and try to connect to some given access points. Then wait for either an AP or STA connection
-  
   startOTA();                  // Start the OTA service
-  
-  startSPIFFS();               // Start the SPIFFS and list all contents
-
+  startSPIFFS();               // Start the SPIFFS and list all content
   startWebSocket();            // Start a WebSocket server
-  
   startMDNS();                 // Start the mDNS responder
-
   startServer();               // Start a HTTP server with a file read handler and an upload handler
-  
 }
 
 bool rainbow = false;             // The rainbow effect is turned off on startup
 
 unsigned long prevMillis = millis();
-int hue = 0;
+
 
 void loop() {
   webSocket.loop();                           // constantly check for websocket events
