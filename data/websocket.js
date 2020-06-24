@@ -1,5 +1,5 @@
 var rainbowEnable = false;
-var status= "";
+var status = "";
 
 var heartbeat_msg = '--heartbeat--', heartbeat_interval = null, missed_heartbeats = 0;
 var connection = new WebSocket('ws://' + location.hostname + ':81/', ['arduino']);
@@ -32,7 +32,8 @@ connection.onerror = function (error) {
 
 
 connection.onmessage = function (e) {
-    console.log('Server: ', e.data);
+    console.log('Server sended: ', e.data);
+
     if (e.data === heartbeat_msg) {
         // reset the counter for missed heartbeats
         missed_heartbeats = 0;
@@ -49,54 +50,78 @@ connection.onmessage = function (e) {
       //  console.log("led switched to ON:"+document.getElementById('blink').src )
       }
     }
+  
+         // cinstruct the bearing value from the string received
+        res = e.data.substr(0, 9);
+        if (res == "Bearing :") {
+        document.getElementById("display").innerHTML = "Rotor receiving bearing data";
+        res = e.data.substr(9, 3);
+        //console.log("This is bearing data: " + res + " degrees");
+        
+        gauge.value = res; 
+        endstop = gauge.value;
+        //gauge.animationduration + 50;
+        gauge.animationDuration = 1500;
+        gauge.draw();
+
+        }
+    
+    // Read switch seetings on esp8266 and change the html accordingly
+    switch(e.data) {
+        case "6":
+            console.log("Brake is switched to OFF");
+            document.getElementById("button_brake").innerHTML = "BRAKE OFF";
+               document.getElementById("button_brake").className = "btn btn-success custom1 btn-lg"; 
+            
+            button_cw.disabled = false;
+            button_ccw.disabled = false;
+
+             break;
+        case "7":
+            var cw_status;
+            cw_status = document.getElementById("button_cw").innerHTML;
+            if (cw_status == "CW ON"){
+            console.log("CW switch is switched to OFF");
+            }
+            var ccw_status;
+            ccw_status = document.getElementById("button_ccw").innerHTML;
+            if (ccw_status == "CCW ON"){
+            console.log("CCW switch is switched to OFF");
+            }
+            console.log("Brake is is switched to ON");    
+            document.getElementById("button_cw").innerHTML = "CW OFF";
+            document.getElementById("button_ccw").innerHTML = "CCW OFF";
+            document.getElementById("button_brake").className = "btn btn-danger custom1 btn-lg"; 
+            document.getElementById("button_brake").innerHTML = "BRAKE ON";
+            button_cw.disabled = true;
+            button_ccw.disabled = true;
+            break;
  
+ 
+        default:
+            break;
+    }
 };
 
 connection.onclose = function () {
   console.log('WebSocket connection closed');
 };
 
+function sendBrake() {
+      var sw_brake = "Toggle Brake";
+      connection.send(sw_brake); 
+      console.log("BRAKE message send : "+sw_brake);
+      sw_brake= "getBRAKEState";
+      connection.send(sw_brake); 
+      console.log("Get the brake state msg  : "+sw_brake);
+  
+}
 function sendSwitch (){
-var sw_ccw = document.getElementById("button_ccw").innerHTML; 
-sw_ccw = "CCW:"+sw_ccw;
-connection.send(sw_ccw); 
-var sw_cw = document.getElementById("button_cw").innerHTML; 
-sw_cw = "CW:"+sw_cw;
-connection.send(sw_cw); 
-console.log("Switch message send !"+sw_cw+" - "+sw_ccw);
-}
-
-function sendRGB () {
-  var r = document.getElementById('r').value** 2 / 1023;
-  var g = document.getElementById('g').value** 2 / 1023;
-  var b = document.getElementById('b').value** 2 / 1023;
-
-  var rgb = r << 20 | g << 10 | b;
-  var rgbstr = '#' + rgb.toString(16);
-  console.log('RGB: ' + rgbstr);
-  connection.send(rgbstr);
-}
-
-function rainbowEffect () {
-  rainbowEnable = ! rainbowEnable;
-  if (rainbowEnable) {
-    connection.send("R");
-    document.getElementById('rainbow').style.backgroundColor = '#00878F';
-    document.getElementById('r').className = 'disabled';
-    document.getElementById('g').className = 'disabled';
-    document.getElementById('b').className = 'disabled';
-    document.getElementById('r').disabled = true;
-    document.getElementById('g').disabled = true;
-    document.getElementById('b').disabled = true;
-  } else {
-    connection.send("N");
-    document.getElementById('rainbow').style.backgroundColor = '#999';
-    document.getElementById('r').className = 'enabled';
-    document.getElementById('g').className = 'enabled';
-    document.getElementById('b').className = 'enabled';
-    document.getElementById('r').disabled = false;
-    document.getElementById('g').disabled = false;
-    document.getElementById('b').disabled = false;
-    sendRGB();
-  }
+      var sw_ccw = document.getElementById("button_ccw").innerHTML; 
+      sw_ccw = "CCW:"+sw_ccw;
+      connection.send(sw_ccw); 
+      var sw_cw = document.getElementById("button_cw").innerHTML; 
+      sw_cw = "CW:"+sw_cw;
+      connection.send(sw_cw); 
+      console.log("Switch message send !"+sw_cw+" - "+sw_ccw);
 }

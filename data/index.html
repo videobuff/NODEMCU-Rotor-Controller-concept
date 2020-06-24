@@ -25,7 +25,8 @@
   
    .custom1 {
     width: 320px !important;
-     padding-bottom: 10px;
+     margin-bottom: 10px;
+       margin-top: 10px;
 }
 
   .jumbotron{
@@ -49,12 +50,12 @@
       <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item active">
-            <a class="nav-link" href="#">Home
+            <a class="nav-link" href="index.html">Home
               <span class="sr-only">(current)</span>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="">Firmware upgrade OTA</a>
+            <a class="nav-link" href="/update.html">Firmware upgrade</a>
           </li>
         </ul>
       </div>
@@ -73,12 +74,17 @@
                 <div class=".btn-group-justified" role="group" aria-label="Basic example" style="padding-bottom: 15px;"> 
                   <button type="button" class="btn btn-primary custom btn-lg" id="button_ccw"  >CCW OFF</button>
             
-                    <button type="button" class="btn btn-primary custom btn-lg" id="button_cw" >CW OFF </button>
+                  <button type="button" class="btn btn-primary custom btn-lg" id="button_cw" >CW OFF </button>
+                  <div class="col-sm text-center">
+                  <button type="button" class="btn btn-success custom1 btn-lg" id="button_brake" onclick="onPressButton(3)">BRAKE OFF </button>
+                  </div>
                 </div>
+                </div>
+          
               <center>
               <div class="alert alert-primary custom1" role="alert" id="rot_stat">Rotor stopped. </div>
                 </center>
-            </div>
+          
          </div>
       </div>
     </div>
@@ -86,7 +92,7 @@
    <!-- Footer -->
     <footer id="sticky-footer" class="py-4 bg-dark text-white-50">
         <div class="container text-center" >
-        <small>GNU licence &copy; 2020 PA0ESH - V1.0</small>
+        <small>GNU licence &copy; 2020 PA0ESH - V1.3</small>
         </div>
   </footer>
   <script>
@@ -219,12 +225,44 @@ function doSomething_ccw(e) {
 function doSomething_cw(e) {
       console.log("pressHold event fired CW!");
       document.getElementById("button_cw").innerHTML = "CW ON";
-    document.getElementById("rot_stat").className = "alert alert-danger custom1"; 
+      document.getElementById("rot_stat").className = "alert alert-danger custom1"; 
       document.getElementById("rot_stat").innerHTML = "Rotor turning CW.";
       sendSwitch();
 
     }
 
+function onPressButton(x) {
+    switch(x){
+        case 1:
+                if (endstop > 358) {
+                console.log("Going CW with rotorvalue: " + endstop);
+                document.getElementById("display").innerHTML = "CW Endstop reached!";
+                } else {
+                document.getElementById("display").innerHTML = "Rotor receiving bearing data";
+                doSend("toggleCW");
+                doSend("getCWState");
+                }
+            break;
+        case 2:
+            if (endstop <= 2) {
+               console.log("Going CCW with rotorvalue: " + endstop);
+                document.getElementById("display").innerHTML = "CCW endstop reached!";
+            } else {
+                document.getElementById("display").innerHTML = "Rotor receiving bearing data";
+                doSend("toggleCCW");
+                doSend("getCCWState");
+            }
+             break;
+        case 3:
+         sendSwitch();
+        sendBrake();
+            
+            break;
+        default:
+            break;
+            
+    }
+    }
 
   </script>
 </body>
