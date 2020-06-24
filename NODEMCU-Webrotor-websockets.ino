@@ -28,11 +28,8 @@
                 Internal flash File system should contain web
                 page called /index.html. Use ESP8266FS Tool
                 to upload File system contents via Arduino IDE.
-  
-  References:   - Orig9nal idea by David A. Mellis and 
-                  modified by Tom Igoe
                 
-  Date:         24 juni 2020
+  Date:         25 juni 2020
  
   Author:       Erik Schott - erik@pa0esh.com
 --------------------------------------------------------------*/
@@ -54,9 +51,12 @@ File fsUploadFile;                 // a File variable to temporarily store the r
 
 Ticker blinker;
 
+char msg_buf[10];
+char *rot_string;
+char client_rotor;
 
-const char *ssid = "XXXXXXXXXX"; // The name of the Wi-Fi network that will be created
-const char *password = "XXXXXXXXXX";   // The password required to connect to it, leave blank for an open network
+const char *ssid = "webrotor"; // The name of the Wi-Fi network Acces Point that will be created
+const char *password = "pe7fg";     // The password required to connect to it, leave blank for an open network
 
 const char *OTAName = "webrotor";           // A name and a password for the OTA service
 const char *OTAPassword = "pa0esh";
@@ -104,7 +104,7 @@ void setup() {
 
   Serial.begin(115200);        // Start the Serial communication to send messages to the computer
   delay(10);
- blinker.attach(1.5, HeartBeat); //Use <strong>attach_ms</strong> if
+ blinker.attach(1, HeartBeat); //Use <strong>attach_ms</strong> if
   Serial.println("\r\n");
 
   startWiFi();                 // Start a Wi-Fi access point, and try to connect to some given access points. Then wait for either an AP or STA connection
@@ -133,8 +133,8 @@ void startWiFi() { // Start a Wi-Fi access point, and try to connect to some giv
   Serial.print(ssid);
   Serial.println("\" started\r\n");
 
-  wifiMulti.addAP("Kotona-1", "Stt1951_mrs");   // add Wi-Fi networks you want to connect to
-  wifiMulti.addAP("Kotona-Boven-2.4", "Stt1951_mrs");
+  wifiMulti.addAP("xxxxxxxxxxxxx", "xxxxxxxxxxxxxx");   // add your home Wi-Fi networks you want to connect to here
+  wifiMulti.addAP("yyyyyyyyyyyyy", "yyyyyyyyyyyyyy");
  
   Serial.println("Connecting");
   while (wifiMulti.run() != WL_CONNECTED && WiFi.softAPgetStationNum() < 1) {  // Wait for the Wi-Fi to connect
@@ -273,7 +273,10 @@ void handleFileUpload(){ // upload a new file to the SPIFFS
   }
 }
 
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) { // When a WebSocket message is received
+void webSocketEvent(uint8_t num, 
+                    WStype_t type, 
+                    uint8_t * payload, 
+                    size_t lenght) { // When a WebSocket message is received
   switch (type) {
     case WStype_DISCONNECTED:             // if the websocket is disconnected
       Serial.printf("[%u] Disconnected!\n", num);
@@ -307,7 +310,71 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         Serial.printf("Switching CW to %u\n", led_state);
         digitalWrite(cw_pin, led_state);
 
+    // Toggle BRAKE
+      } else if ( strcmp((char *)payload, "Toggle Brake") == 0 ) {
+        brake_state = brake_state ? 0 : 1;
+        Serial.printf("Toggling the Brake to %u\n", brake_state);
+        // check if CW and CCW switches are OFF, or switch them OFF
+
+        if (cw_state == 1){
+         cw_state=0;
+         Serial.printf("Toggling the CW switch to %u\n", cw_state);
+         digitalWrite(cw_pin, cw_state);
+         delay(500);
+        }
+
+        if (ccw_state == 1){
+         ccw_state=0;
+         Serial.printf("Toggling the CCW switch to %u\n", ccw_state);
+         digitalWrite(ccw_pin, ccw_state);
+         delay(500);
+        }
+  
+        digitalWrite(brake_pin, brake_state);
+      
+       // Report the state of the CW button
+      } else if ( strcmp((char *)payload, "getCWState") == 0 ) {
+        sprintf(msg_buf, "%d", cw_state +2);
+        Serial.printf("Sending to [%u]: %s\n", num, msg_buf);
+        webSocket.broadcastTXT(msg_buf);
+        
+        // Report the state of the CCW button
+      } else if ( strcmp((char *)payload, "getCCWState") == 0 ) {
+        sprintf(msg_buf, "%d", ccw_state+4);
+        Serial.printf("Sending to [%u]: %s\n", num, msg_buf);
+        webSocket.broadcastTXT(msg_buf);
+
+        // Report the state of the rotor bearing button
+      } else if ( strcmp((char *)payload, "getBEARINGState") == 0 ) {
+        Serial.println("Sending bearing data to client");
+        analog_val = analogRead(analog_pin);   
+        analog_val = map(analog_val,4,4096,0,360);  // here is wehere you convert from voltage rotor into degrees
+        String rotor = String(analog_val);
+        rotor = "Bearing :"+rotor,
+        webSocket.broadcastTXT( rotor);
+        
+        // Report the state of the BRAKE button
+      } else if ( strcmp((char *)payload, "getBRAKEState") == 0 ) {
+        sprintf(msg_buf, "%d", brake_state+6);
+        Serial.printf("Sending to [%u]: %s\n", num, msg_buf);
+        webSocket.broadcastTXT(msg_buf);
+ 
+  
+      // Message not recognized
+      } else {
+        Serial.println("[%u] Message not recognized");
+        
       }
+      break;
+ 
+    // For everything else: do nothing
+    case WStype_BIN:
+    case WStype_ERROR:
+    case WStype_FRAGMENT_TEXT_START:
+    case WStype_FRAGMENT_BIN_START:
+    case WStype_FRAGMENT:
+    case WStype_FRAGMENT_FIN:
+    default:
       break;
   }
 }
