@@ -11,7 +11,11 @@ The bulb in the menu indicates the heartbeat connection between webbrowser and e
 Make sure both are on the same network.
 If so you can connect your browser with http://webrotor.local/
 
-There is AP called webrotor with a password. Adapt the ketch to your own needs.
+There is AP called webrotor available in your Wifi environment, with a password "hamradio". 
+Adapt the ketch to your own needs if you like to change this
+Connection to your own network is defined at line which show  wifiMulti.addAP("yyyyyyyyyyyyy", "yyyyyyyyyyyyyy");
+Change the x'es or y's to your own environment.
+
 In the sketch the following pins are defined
 
 - D4 = CW relay
