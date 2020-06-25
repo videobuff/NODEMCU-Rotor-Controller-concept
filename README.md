@@ -7,8 +7,9 @@ I use the HL-52S for CW and CCW operation
 If you have a brake to operate, look for a three relay board or more.
 The brake function is included and an active brake, disables the CW and CCW buttons.
 
-The bulb in the menua indicates the heartbeat connection between webbrowser and esp8266. 
-Make sure both are the the same network.
+The bulb in the menu indicates the heartbeat connection between webbrowser and esp8266. 
+Make sure both are on the same network.
+If so you can connect your browser with http://webrotor.local/
 
 There is AP called webrotor with a password. Adapt the ketch to your own needs.
 
