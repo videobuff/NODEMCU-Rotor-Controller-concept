@@ -1,6 +1,4 @@
-var rainbowEnable = false;
 var status = "";
-
 var heartbeat_msg = '--heartbeat--', heartbeat_interval = null, missed_heartbeats = 0;
 var connection = new WebSocket('ws://' + location.hostname + ':81/', ['arduino']);
 connection.onopen = function () {
@@ -33,6 +31,7 @@ connection.onerror = function (error) {
 
 connection.onmessage = function (e) {
     console.log('Server sended: ', e.data);
+      document.getElementById("rot_stat").innerHTML = "Rotor connected.";
 
     if (e.data === heartbeat_msg) {
         // reset the counter for missed heartbeats
@@ -105,7 +104,11 @@ connection.onmessage = function (e) {
 
 connection.onclose = function () {
   console.log('WebSocket connection closed');
+  document.getElementById("rot_stat").innerHTML = "Rotor disconnected, retrying";
+    // Try to reconnect after a few seconds
+    setTimeout(function() { wsConnect(url) }, 2000);
 };
+
 
 function sendBrake() {
       var sw_brake = "Toggle Brake";
