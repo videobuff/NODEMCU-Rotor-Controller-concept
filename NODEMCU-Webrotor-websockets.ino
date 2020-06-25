@@ -15,10 +15,10 @@
                 boards.
                 A0 Analog input - The output voltage of the rotor should
                    be brought back to 0 - 3.3V. Use resistors to accomplish.
-                D5 Output CW
-                D6 Output CCW
-                D7 Input
-                D8 Input. Pull-down
+                D4 Output CW
+                D5 Output CCW
+                D6 Output Brake
+
                 Relays: Jotta SSR-25 da
                 
   Software:     Developed using Arduino 1.8.12 software
@@ -62,10 +62,10 @@ const char *OTAName = "webrotor";           // A name and a password for the OTA
 const char *OTAPassword = "pa0esh";
 
 const int led_pin     = D2;  // Testing LED pin
-const int cw_pin      = D3;  // connect your cw relais between GND and this pin
-const int ccw_pin     = D4;  // connect your ccw relais between GND and this pin
-const int brake_pin   = D5;  // connect your brake relais between GND and this pin
-const int spare_pin   = D6;  // connect your spare relais between GND and this pin
+const int cw_pin      = D4;  // connect your cw relais between GND and this pin
+const int ccw_pin     = D5;  // connect your ccw relais between GND and this pin
+const int brake_pin   = D6;  // connect your brake relais between GND and this pin
+const int spare_pin   = D7;  // connect your spare relais between GND and this pin
 const int analog_pin  = A0;  // connect your potentiometer middle to this pin. other side 3.3V and GND
 
 
